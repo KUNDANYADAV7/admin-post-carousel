@@ -17,13 +17,13 @@ function Hero() {
             >
               <div className="group relative">
                 <img
-                  src={element.blogImage.url}
+                  src={element?.blogImage?.url}
                   alt=""
                   className="w-full h-56 object-cover"
                 />
                 <div className=" absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-75 group-hover:opacity-100 transition-transform duration-300"></div>
                 <h1 className=" absolute bottom-4 left-4 text-white text-xl font-bold group-hover:text-yellow-500 transition-colors duration-300">
-                  {element.title}
+                  {element?.title}
                 </h1>
               </div>
               <div className="p-6 flex items-center">
@@ -34,7 +34,7 @@ function Hero() {
                 />
                 <div className="ml-4">
                   <p className="text-lg font-semibold text-gray-800">
-                    {element.adminName}
+                    {element?.adminName}
                   </p>
                   <p className="text-xs text-gray-400">New</p>
                 </div>
@@ -52,3 +52,6 @@ function Hero() {
 }
 
 export default Hero;
+
+
+

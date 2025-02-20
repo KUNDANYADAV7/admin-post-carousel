@@ -86,14 +86,55 @@ export const getMyBlogs = async (req, res) => {
   res.status(200).json(myBlogs);
 };
 
+
+
 export const updateBlog = async (req, res) => {
   const { id } = req.params;
+
+  // Validate the blog ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid Blog id" });
+    return res.status(400).json({ message: "Invalid Blog ID" });
   }
-  const updatedBlog = await Blog.findByIdAndUpdate(id, req.body, { new: true });
-  if (!updatedBlog) {
-    return res.status(404).json({ message: "Blog not found" });
+
+  try {
+    const { title, category, about } = req.body;
+    let blogImageUrl = null;
+
+    // Check if a new image is uploaded
+    if (req.files && req.files.blogImage) {
+      const file = req.files.blogImage;
+
+      // Upload the new image to Cloudinary
+      const result = await cloudinary.uploader.upload(file.tempFilePath, {
+        folder: "blog-images", // Optional: Specify a folder in Cloudinary
+      });
+
+      blogImageUrl = result.secure_url; // Get the secure URL of the uploaded image
+    }
+
+    // Prepare the update object
+    const updateData = {
+      title,
+      category,
+      about,
+      ...(blogImageUrl && { blogImage: { url: blogImageUrl } }), // Only update image if a new one is uploaded
+    };
+
+    // Find and update the blog
+    const updatedBlog = await Blog.findByIdAndUpdate(id, updateData, {
+      new: true, // Return the updated document
+    });
+
+    if (!updatedBlog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.status(200).json(updatedBlog);
+  } catch (error) {
+    console.error("Error updating blog:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-  res.status(200).json(updatedBlog);
 };
+
+
+

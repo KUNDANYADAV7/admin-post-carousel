@@ -8,9 +8,9 @@ function Home() {
   return (
     <div>
       <Hero />
-      <Trending />
+      {/* <Trending />
       <Devotional />
-      <Creator />
+      <Creator /> */}
     </div>
   );
 }

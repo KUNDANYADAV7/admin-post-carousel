@@ -10,15 +10,15 @@ function Blogs() {
     <div>
       <div className="container mx-auto my-12 p-4">
         <h1 className="text-2xl font-bold mb-6">All Blogs goes here!!!</h1>
-        <p className="text-center mb-8">
+        {/* <p className="text-center mb-8">
           The concept of gods varies widely across different cultures,
           religions, and belief systems
-        </p>
+        </p> */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {blogs && blogs.length > 0 ? (
             blogs.map((blog, index) => (
               <Link
-                to={`/blog/${blog.id}`}
+                to={`/blog/${blog._id}`}
                 key={index}
                 className="relative rounded-lg overflow-hidden shadow-md transform hover:scale-105 transition-transform duration-300"
               >

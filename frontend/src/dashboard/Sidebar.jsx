@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 function Sidebar({ setComponent }) {
   const { profile, setIsAuthenticated } = useAuth();
-  // console.log(profile?.user);
+  console.log(profile);
   const navigateTo = useNavigate();
 
   const [show, setShow] = useState(false);
@@ -59,7 +59,7 @@ function Sidebar({ setComponent }) {
         <div className="text-center">
           <img
             className="w-24 h-24 rounded-full mx-auto mb-2"
-            src={profile?.user?.photo?.url}
+            src={profile?.photo?.url}
             alt=""
           />
           <p className="text-lg font-semibold">{profile?.user?.name}</p>

@@ -1,28 +1,35 @@
+
+
+
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../context/AuthProvider";
 
 function UpdateBlog() {
   const navigateTo = useNavigate();
   const { id } = useParams();
 
+  const { fetchBlogs } = useAuth();
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [about, setAbout] = useState("");
-
   const [blogImage, setBlogImage] = useState("");
   const [blogImagePreview, setBlogImagePreview] = useState("");
+  console.log(blogImage);
 
   const changePhotoHandler = (e) => {
-    console.log(e);
     const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      setBlogImagePreview(reader.result);
-      setBlogImage(file);
-    };
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        setBlogImagePreview(reader.result);
+        setBlogImage(file);
+      };
+    }
   };
 
   useEffect(() => {
@@ -30,26 +37,54 @@ function UpdateBlog() {
       try {
         const { data } = await axios.get(
           `http://localhost:4001/api/blogs/single-blog/${id}`,
-
           {
             withCredentials: true,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
           }
         );
+
         console.log(data);
         setTitle(data?.title);
         setCategory(data?.category);
         setAbout(data?.about);
-        setBlogImage(data?.blogImage.url);
+        setBlogImage(data?.blogImage?.url);
       } catch (error) {
         console.log(error);
-        toast.error("Please fill the required fields");
+        toast.error("Failed to fetch blog details");
       }
     };
     fetchBlog();
   }, [id]);
+
+  // const handleUpdate = async (e) => {
+  //   e.preventDefault();
+  //   const formData = new FormData();
+  //   formData.append("title", title);
+  //   formData.append("category", category);
+  //   formData.append("about", about);
+  //   if (blogImage instanceof File) {
+  //     formData.append("blogImage", blogImage);
+  //   }
+
+  //   try {
+  //     const { data } = await axios.put(
+  //       `http://localhost:4001/api/blogs/update/${id}`,
+  //       formData,
+  //       {
+  //         withCredentials: true,
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
+  //     toast.success(data.message || "Blog updated successfully");
+  //     navigateTo("/");
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error(
+  //       error.response?.data?.message || "Please fill the required fields"
+  //     );
+  //   }
+  // };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -57,8 +92,10 @@ function UpdateBlog() {
     formData.append("title", title);
     formData.append("category", category);
     formData.append("about", about);
-
-    formData.append("blogImage", blogImage);
+    if (blogImage instanceof File) {
+      formData.append("blogImage", blogImage); // Append the image file
+    }
+  
     try {
       const { data } = await axios.put(
         `http://localhost:4001/api/blogs/update/${id}`,
@@ -70,13 +107,13 @@ function UpdateBlog() {
           },
         }
       );
-      console.log(data);
       toast.success(data.message || "Blog updated successfully");
       navigateTo("/");
+      fetchBlogs();
     } catch (error) {
       console.log(error);
       toast.error(
-        error.response.data.message || "Please fill the required fields"
+        error.response?.data?.message || "Please fill the required fields"
       );
     }
   };
@@ -87,7 +124,7 @@ function UpdateBlog() {
         <section className="max-w-2xl mx-auto">
           <h3 className="text-2xl font-bold mb-6">UPDATE BLOG</h3>
           <form>
-            <div className="mb-4">
+          <div className="mb-4">
               <label className="block mb-2 font-semibold">Category</label>
               <select
                 className="w-full p-2 border rounded-md"
@@ -131,7 +168,7 @@ function UpdateBlog() {
             <textarea
               rows="6"
               className="w-full p-2 mb-4 border rounded-md"
-              placeholder="Something about your blog atleast 200 characters!"
+              placeholder="Something about your blog at least 200 characters!"
               value={about}
               onChange={(e) => setAbout(e.target.value)}
             />

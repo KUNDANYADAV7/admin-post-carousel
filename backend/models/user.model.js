@@ -26,15 +26,18 @@ const userSchema = new mongoose.Schema({
       required: true,
     },
   },
-  education: {
-    type: String,
-    required: true,
-  },
+  // role: {
+  //   type: String,
+  //   required: true,
+  //   enum: ["user", "admin"],
+  // },
   role: {
     type: String,
-    required: true,
-    enum: ["user", "admin"],
-  },
+    enum: ["admin"], // Only allow "admin"
+    default: "admin", // Always set to "admin" by default
+    // required: true,
+},
+
   password: {
     type: String,
     required: true,
