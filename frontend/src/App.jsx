@@ -80,6 +80,9 @@ import UpdateBlog from "./dashboard/UpdateBlog";
 import Detail from "./pages/Detail";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "react-hot-toast";
+import UpdateCarousel from "./dashboard/Carousel/UpdateCarousel";
+import Carousels from "./pages/Carousels";
+import CarouselDetail from "./pages/CarouselDetail";
 
 function App() {
   const location = useLocation();
@@ -99,6 +102,7 @@ function App() {
           element={token ? <Home /> : <Navigate to="/login" />}
         />
         <Route exact path="/blogs" element={<Blogs />} />
+        <Route exact path="/carousels" element={<Carousels />} />
         <Route exact path="/about" element={<About />} />
         <Route exact path="/contact" element={<Contact />} />
         <Route exact path="/creators" element={<Creators />} />
@@ -125,6 +129,10 @@ function App() {
         {/* Blog Detail & Update Routes */}
         <Route exact path="/blog/:id" element={<Detail />} />
         <Route exact path="/blog/update/:id" element={<UpdateBlog />} />
+
+        {/* Blog Detail & Update Routes */}
+        <Route exact path="/single-carousel/:id" element={<CarouselDetail />} />
+        <Route exact path="/carousel/update-carousel/:id" element={<UpdateCarousel />} />
 
         {/* 404 Page */}
         <Route path="*" element={<NotFound />} />

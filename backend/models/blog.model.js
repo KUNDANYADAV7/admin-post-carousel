@@ -22,7 +22,7 @@ const blogSchema = new mongoose.Schema({
   about: {
     type: String,
     required: true,
-    minlength: [200, "Should caontain atleast 200 characters!"],
+    minlength: [200, "Should contain atleast 200 characters!"],
   },
   adminName: {
     type: String,

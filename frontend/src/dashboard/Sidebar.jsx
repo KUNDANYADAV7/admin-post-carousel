@@ -84,6 +84,18 @@ function Sidebar({ setComponent }) {
             MY PROFILE
           </button>
           <button
+            onClick={() => handleComponents("Create Carousel")}
+            className="w-full px-4 py-2 bg-pink-500 rounded-lg hover:bg-pink-200 transition duration-300"
+          >
+            Create Carousel
+          </button>
+          <button
+            onClick={() => handleComponents("My Carousels")}
+            className="w-full px-4 py-2 bg-pink-500 rounded-lg hover:bg-green-300 transition duration-300"
+          >
+            My Carousels
+          </button>
+          <button
             onClick={gotoHome}
             className="w-full px-4 py-2 bg-red-500 rounded-lg hover:bg-red-700 transition duration-300"
           >

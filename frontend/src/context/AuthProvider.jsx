@@ -5,6 +5,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [blogs, setBlogs] = useState([]);
+  const [carousels, setCarousels] = useState([]);
   const [profile, setProfile] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -47,11 +48,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+
+  const fetchCarousels = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:4001/api/carousel/all-carousels",
+        { withCredentials: true }
+      );
+      console.log(data);
+      setCarousels(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
  
 
     fetchBlogs();
     fetchProfile();
+    fetchCarousels();
   }, []);
 
   return (
@@ -63,6 +79,8 @@ export const AuthProvider = ({ children }) => {
         setProfile,
         isAuthenticated,
         setIsAuthenticated,
+        fetchCarousels,
+        carousels
       }}
     >
       {children}

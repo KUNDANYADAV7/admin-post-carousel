@@ -42,6 +42,7 @@ function Navbar() {
         <div className="hidden md:flex items-center space-x-6">
           <Link to="/" className="hover:text-blue-500">HOME</Link>
           <Link to="/blogs" className="hover:text-blue-500">BLOGS</Link>
+          <Link to="/carousels" className="hover:text-blue-500">Carousels</Link>
           {/* <Link to="/creators" className="hover:text-blue-500">CREATORS</Link> */}
           <Link to="/about" className="hover:text-blue-500">ABOUT</Link>
           <Link to="/contact" className="hover:text-blue-500">CONTACT</Link>

@@ -6,6 +6,11 @@ import MyBlogs from "../dashboard/MyBlogs";
 import CreateBlog from "../dashboard/CreateBlog";
 import UpdateBlog from "../dashboard/UpdateBlog";
 import { Navigate } from "react-router-dom";
+import CreateCarousel from "../dashboard/Carousel/CreateCarousel";
+import MyCarousels from "../dashboard/Carousel/MyCarousels";
+import UpdateCarousel from "../dashboard/Carousel/UpdateCarousel";
+
+
 function Dashboard() {
   const { profile, isAuthenticated } = useAuth();
   const [component, setComponent] = useState("My Blogs");
@@ -18,16 +23,22 @@ function Dashboard() {
   return (
     <div>
       <div>
-        <Sidebar component={component} setComponent={setComponent} />
-        {component === "My Profile" ? (
-          <MyProfile />
-        ) : component === "Create Blog" ? (
-          <CreateBlog />
-        ) : component === "Update Blog" ? (
-          <UpdateBlog />
-        ) : (
-          <MyBlogs />
-        )}
+      <Sidebar component={component} setComponent={setComponent} />
+      {component === "My Profile" ? (
+        <MyProfile />
+      ) : component === "Create Blog" ? (
+        <CreateBlog />
+      ) : component === "Update Blog" ? (
+        <UpdateBlog />
+      ) : component === "My Carousels" ? (
+        <MyCarousels />
+      ) : component === "Create Carousel" ? (
+        <CreateCarousel />
+      ) : component === "Update Carousel" ? (
+        <UpdateCarousel />
+      ) : (
+        <MyBlogs />
+      )}
       </div>
     </div>
   );
