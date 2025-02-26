@@ -27,7 +27,6 @@ export const createBlog = async (req, res) => {
       blogImage.tempFilePath
     );
     if (!cloudinaryResponse || cloudinaryResponse.error) {
-      console.log(cloudinaryResponse.error);
     }
     const blogData = {
       title,
@@ -48,7 +47,6 @@ export const createBlog = async (req, res) => {
       blog,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ error: "Internal Server error" });
   }
 };
@@ -131,7 +129,6 @@ export const updateBlog = async (req, res) => {
 
     res.status(200).json(updatedBlog);
   } catch (error) {
-    console.error("Error updating blog:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

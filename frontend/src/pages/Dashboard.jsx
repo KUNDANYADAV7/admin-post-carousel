@@ -14,8 +14,6 @@ import UpdateCarousel from "../dashboard/Carousel/UpdateCarousel";
 function Dashboard() {
   const { profile, isAuthenticated } = useAuth();
   const [component, setComponent] = useState("My Blogs");
-  console.log(profile);
-  console.log(isAuthenticated);
 
   if (!isAuthenticated) {
     return <Navigate to={"/"} />;

@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthProvider";
+import config from "../../config";
+import { FaUserCircle } from "react-icons/fa";
 
 function CreateCarousel() {
   const [title, setTitle] = useState("");
@@ -36,7 +38,7 @@ function CreateCarousel() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:4001/api/carousel/create-carousel",
+        `${config.apiUrl}/api/carousel/create-carousel`,
         formData,
         {
           withCredentials: true,
@@ -97,12 +99,15 @@ function CreateCarousel() {
           <div className="space-y-2">
             <label className="block text-lg">Carousel Image</label>
             <div className="flex items-center justify-center">
-              <img
-                src={imagePreview || "/imgPL.webp"}
-                alt="Carousel"
-                className="w-full max-w-sm h-auto rounded-md object-cover"
-                required
-              />
+              {imagePreview ? (
+      <img
+        src={imagePreview}
+        alt="Carousel"
+        className="w-full h-auto rounded-md object-cover"
+      />
+    ) : (
+      <FaUserCircle size={60} color="gray" />
+    )}
             </div>
             <input
               type="file"

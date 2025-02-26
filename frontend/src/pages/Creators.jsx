@@ -1,14 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import config from "../config";
 
 function Creators() {
   const [creators, setCreators] = useState([]);
-  console.log(creators);
   useEffect(() => {
     const fetchCreators = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:4001/api/users/admins",
+          `${config.apiUrl}/api/users/admins`,
           {
             withCredentials: true,
           }

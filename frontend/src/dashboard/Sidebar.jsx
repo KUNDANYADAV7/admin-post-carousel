@@ -1,114 +1,147 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CiMenuBurger } from "react-icons/ci";
 import { BiSolidLeftArrowAlt } from "react-icons/bi";
 import toast from "react-hot-toast";
+import {
+  DocumentTextIcon,
+  PencilSquareIcon,
+  PhotoIcon,
+  UserCircleIcon,
+  FilmIcon,
+  HomeIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/solid";
+import config from "../config";
 
-function Sidebar({ setComponent }) {
+function Sidebar({ setComponent, setSidebarOpen }) {
   const { profile, setIsAuthenticated } = useAuth();
-  console.log(profile);
   const navigateTo = useNavigate();
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [show, setShow] = useState(window.innerWidth >= 768);
 
-  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      if (window.innerWidth >= 768) {
+        setShow(true);
+        setSidebarOpen(true);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [setSidebarOpen]);
+
+  const handleClose = () => {
+    if (windowWidth < 768) {
+      setShow(false);
+      setSidebarOpen(false);
+    }
+  };
+
+  const handleOpen = () => {
+    setShow(true);
+    setSidebarOpen(true);
+  };
 
   const handleComponents = (value) => {
     setComponent(value);
+    if (windowWidth < 768) {
+      setShow(false);
+      setSidebarOpen(false);
+    }
   };
+
   const gotoHome = () => {
     navigateTo("/");
+    if (windowWidth < 768) {
+      setShow(false);
+      setSidebarOpen(false);
+    }
   };
 
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
       const { data } = await axios.get(
-        "http://localhost:4001/api/users/logout",
+        `${config.apiUrl}/api/users/logout`,
         { withCredentials: true }
       );
       toast.success(data.message);
-       localStorage.removeItem("jwt"); // deleting token in localStorage so that if user logged out it will goes to login page
+      localStorage.removeItem("jwt");
       setIsAuthenticated(false);
       navigateTo("/login");
     } catch (error) {
-      console.log(error);
-      toast.error(error.data.message || "Failed to logout");
+      toast.error(error.response?.data?.message || "Failed to logout");
     }
   };
 
+  const menuItems = [
+    { name: "My Blogs", icon: <DocumentTextIcon className="h-5 w-5" /> },
+    { name: "Create Blog", icon: <PencilSquareIcon className="h-5 w-5" /> },
+    { name: "My Profile", icon: <UserCircleIcon className="h-5 w-5" /> },
+    { name: "Create Carousel", icon: <PhotoIcon className="h-5 w-5" /> },
+    { name: "My Carousels", icon: <FilmIcon className="h-5 w-5" /> },
+    { name: "Home", icon: <HomeIcon className="h-5 w-5" /> },
+    { name: "Logout", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" /> },
+  ];
+
   return (
     <>
-      <div
-        className="sm:hidden fixed top-4 left-4 z-50"
-        onClick={() => setShow(!show)}
-      >
-        <CiMenuBurger className="text-2xl" />
-      </div>
-      <div
-        className={`w-64 h-full shadow-lg fixed top-0 left-0 bg-gray-50 transition-transform duration-300 transform sm:translate-x-0 ${
-          show ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      {!show && windowWidth < 768 && (
         <div
-          className="sm:hidden absolute top-4 right-4 text-xl cursor-pointer"
-          onClick={() => setShow(!show)}
+          className="fixed top-4 left-4 z-50 bg-black p-3 rounded cursor-pointer"
+          onClick={handleOpen}
         >
-          <BiSolidLeftArrowAlt className="text-2xl" />
+          <CiMenuBurger className="text-3xl text-white" />
         </div>
-        <div className="text-center">
-          <img
-            className="w-24 h-24 rounded-full mx-auto mb-2"
-            src={profile?.photo?.url}
-            alt=""
-          />
-          <p className="text-lg font-semibold">{profile?.user?.name}</p>
+      )}
+
+      {show && (
+        <div className="w-64 h-screen shadow-lg fixed top-0 left-0 bg-black text-white transition-transform duration-300 transform z-50 overflow-y-auto">
+          {/* Close button should always be available on small screens */}
+          {windowWidth < 768 && (
+            <div
+              className="absolute top-4 right-4 text-3xl cursor-pointer text-white p-2"
+              onClick={handleClose}
+            >
+              <BiSolidLeftArrowAlt className="text-4xl" />
+            </div>
+          )}
+
+          <div className="text-center py-6">
+            <img
+              className="w-24 h-24 rounded-full mx-auto "
+              src={profile?.photo?.url}
+              alt="User Profile"
+            />
+            <p className="text-lg font-semibold">{profile?.user?.name}</p>
+          </div>
+
+          <ul className="flex flex-col space-y-6 mx-6 pb-10">
+            {menuItems.map((item, index) => (
+              <li
+                key={index}
+                onClick={(e) =>
+                  item.name === "Logout"
+                    ? handleLogout(e)
+                    : item.name === "Home"
+                    ? gotoHome()
+                    : handleComponents(item.name)
+                }
+                
+                className="cursor-pointer text-white text-lg flex items-center space-x-3 px-4 py-2 rounded-lg 
+                hover:bg-gray-100 hover:text-black hover:scale-105"
+              >
+                {item.icon}
+                <span>{item.name}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul className="space-y-6 mx-4">
-          <button
-            onClick={() => handleComponents("My Blogs")}
-            className="w-full px-4 py-2 bg-green-500 rounded-lg hover:bg-green-700 transition duration-300"
-          >
-            MY BLOGS
-          </button>
-          <button
-            onClick={() => handleComponents("Create Blog")}
-            className="w-full px-4 py-2 bg-blue-400 rounded-lg hover:bg-blue-700 transition duration-300"
-          >
-            CREATE BLOG
-          </button>
-          <button
-            onClick={() => handleComponents("My Profile")}
-            className="w-full px-4 py-2 bg-pink-500 rounded-lg hover:bg-pink-700 transition duration-300"
-          >
-            MY PROFILE
-          </button>
-          <button
-            onClick={() => handleComponents("Create Carousel")}
-            className="w-full px-4 py-2 bg-pink-500 rounded-lg hover:bg-pink-200 transition duration-300"
-          >
-            Create Carousel
-          </button>
-          <button
-            onClick={() => handleComponents("My Carousels")}
-            className="w-full px-4 py-2 bg-pink-500 rounded-lg hover:bg-green-300 transition duration-300"
-          >
-            My Carousels
-          </button>
-          <button
-            onClick={gotoHome}
-            className="w-full px-4 py-2 bg-red-500 rounded-lg hover:bg-red-700 transition duration-300"
-          >
-            HOME
-          </button>
-          <button
-            onClick={handleLogout}
-            className="w-full px-4 py-2 bg-yellow-500 rounded-lg hover:bg-yellow-700 transition duration-300"
-          >
-            LOGOUT
-          </button>
-        </ul>
-      </div>
+      )}
     </>
   );
 }

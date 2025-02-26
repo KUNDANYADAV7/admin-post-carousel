@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import config from "../../config";
 
 function UpdateCarousel() {
   const navigateTo = useNavigate();
@@ -30,7 +31,7 @@ function UpdateCarousel() {
     const fetchCarousel = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:4001/api/carousel/single-carousel/${id}`,
+          `${config.apiUrl}/api/carousel/single-carousel/${id}`,
           { withCredentials: true }
         );
 
@@ -56,7 +57,7 @@ function UpdateCarousel() {
 
     try {
       const { data } = await axios.put(
-        `http://localhost:4001/api/carousel/update-carousel/${id}`,
+        `${config.apiUrl}/api/carousel/update-carousel/${id}`,
         formData,
         {
           withCredentials: true,

@@ -6,6 +6,9 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
+import config from "../config";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 function UpdateBlog() {
   const navigateTo = useNavigate();
@@ -18,7 +21,6 @@ function UpdateBlog() {
   const [about, setAbout] = useState("");
   const [blogImage, setBlogImage] = useState("");
   const [blogImagePreview, setBlogImagePreview] = useState("");
-  console.log(blogImage);
 
   const changePhotoHandler = (e) => {
     const file = e.target.files[0];
@@ -36,13 +38,13 @@ function UpdateBlog() {
     const fetchBlog = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:4001/api/blogs/single-blog/${id}`,
+          `${config.apiUrl}/api/blogs/single-blog/${id}`,
           {
             withCredentials: true,
           }
         );
 
-        console.log(data);
+      
         setTitle(data?.title);
         setCategory(data?.category);
         setAbout(data?.about);
@@ -55,36 +57,6 @@ function UpdateBlog() {
     fetchBlog();
   }, [id]);
 
-  // const handleUpdate = async (e) => {
-  //   e.preventDefault();
-  //   const formData = new FormData();
-  //   formData.append("title", title);
-  //   formData.append("category", category);
-  //   formData.append("about", about);
-  //   if (blogImage instanceof File) {
-  //     formData.append("blogImage", blogImage);
-  //   }
-
-  //   try {
-  //     const { data } = await axios.put(
-  //       `http://localhost:4001/api/blogs/update/${id}`,
-  //       formData,
-  //       {
-  //         withCredentials: true,
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-  //     toast.success(data.message || "Blog updated successfully");
-  //     navigateTo("/");
-  //   } catch (error) {
-  //     console.log(error);
-  //     toast.error(
-  //       error.response?.data?.message || "Please fill the required fields"
-  //     );
-  //   }
-  // };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -98,7 +70,7 @@ function UpdateBlog() {
   
     try {
       const { data } = await axios.put(
-        `http://localhost:4001/api/blogs/update/${id}`,
+        `${config.apiUrl}/api/blogs/update/${id}`,
         formData,
         {
           withCredentials: true,
@@ -118,6 +90,17 @@ function UpdateBlog() {
     }
   };
 
+  const modules = {
+    toolbar: [
+      [{ header: "1" }, { header: "2" }, { font: [] }],
+      [{ list: "ordered" }, { list: "bullet" }], // Ensure ordered lists are enabled
+      ["bold", "italic", "underline", "strike"],
+      [{ align: [] }],
+      ["link"],
+      ["clean"],
+    ],
+  };
+
   return (
     <div>
       <div className="container mx-auto my-12 p-4">
@@ -132,11 +115,11 @@ function UpdateBlog() {
                 onChange={(e) => setCategory(e.target.value)}
               >
                 <option value="">Select Category</option>
-                <option value="Devotion">Devotion</option>
-                <option value="Sports">Sports</option>
-                <option value="Coding">Coding</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Business">Business</option>
+                <option value="Digital Marketing">Digital Marketing</option>
+                <option value="Mobile Application">Mobile Application</option>
+                <option value="SEO">SEO</option>
+                <option value="Cloud Tech">Cloud Tech</option>
+                <option value="Website Development">Website Development</option>
               </select>
             </div>
             <input
@@ -165,13 +148,19 @@ function UpdateBlog() {
                 onChange={changePhotoHandler}
               />
             </div>
-            <textarea
-              rows="6"
-              className="w-full p-2 mb-4 border rounded-md"
-              placeholder="Something about your blog at least 200 characters!"
-              value={about}
-              onChange={(e) => setAbout(e.target.value)}
-            />
+
+            <div className="space-y-2">
+                        <label className="block text-lg">About</label>
+                        <ReactQuill
+                          theme="snow"
+                          value={about}
+                          onChange={setAbout}
+                          modules={modules}
+                          className="bg-white border border-gray-400 rounded-md"
+                          placeholder="Write something about your blog..."
+                          required
+                        />
+                      </div>
 
             <button
               className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"

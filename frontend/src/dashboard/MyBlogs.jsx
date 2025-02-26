@@ -2,17 +2,19 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import config from "../config";
+import { useAuth } from "../context/AuthProvider";
 
-function MyBlogs() {
+function MyBlogs({sidebarOpen}) {
   const [myBlogs, setMyBlogs] = useState([]);
+    const { fetchBlogs,refreshData  } = useAuth();
   useEffect(() => {
     const fetchMyBlogs = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:4001/api/blogs/my-blog",
+          `${config.apiUrl}/api/blogs/my-blog`,
           { withCredentials: true }
         );
-        console.log(data);
         setMyBlogs(data);
       } catch (error) {
         console.log(error);
@@ -22,22 +24,33 @@ function MyBlogs() {
   }, []);
 
   const handleDelete = async (id) => {
-    await axios
-      .delete(`http://localhost:4001/api/blogs/delete/${id}`, {
+    try {
+      const res = await axios.delete(`${config.apiUrl}/api/blogs/delete/${id}`, {
         withCredentials: true,
-      })
-      .then((res) => {
-        toast.success(res.data.message || "Blog deleted successfully");
-        setMyBlogs((value) => value.filter((blog) => blog._id !== id));
-      })
-      .catch((error) => {
-        toast.error(error.response.message || "Failed to delete blog");
       });
+  
+      toast.success(res.data.message || "Blog deleted successfully");
+  
+      // Remove deleted blog from the state immediately
+      setMyBlogs((prevBlogs) => prevBlogs.filter((blog) => blog._id !== id));
+  
+      // Fetch updated list from the server
+      fetchBlogs(); 
+    } catch (error) {
+      console.error("Delete Error:", error);
+      toast.error(error.response?.data?.message || "Failed to delete blog");
+    }
   };
+  
   return (
-    <div>
-      <div className="container mx-auto my-12 p-4">
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 md:ml-20">
+    <div
+      className={`p-4 min-h-screen transition-all duration-300 ${
+        sidebarOpen ? "ml-72" : "ml-0"
+      }`}
+    >
+
+      <div className="container mx-auto p-4">
+        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 md:ml-60">
           {myBlogs && myBlogs.length > 0 ? (
             myBlogs.map((element) => (
               <div
@@ -87,3 +100,5 @@ function MyBlogs() {
 }
 
 export default MyBlogs;
+
+

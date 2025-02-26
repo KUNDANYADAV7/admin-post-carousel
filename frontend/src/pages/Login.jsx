@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
+import config from "../config";
 
 function Login() {
   const { isAuthenticated, setIsAuthenticated, setProfile } = useAuth();
@@ -16,7 +17,7 @@ function Login() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:4001/api/users/login",
+        `${config.apiUrl}/api/users/login`,
         { email, password },
         {
           withCredentials: true,
@@ -25,8 +26,6 @@ function Login() {
           },
         }
       );
-      console.log(data);
-      // Store the token in localStorage
       localStorage.setItem("jwt", data.token); // storing token in localStorage so that if user refreshed the page it will not redirect again in login
       toast.success(data.message || "User Logined successfully", {
         duration: 3000,
@@ -53,7 +52,9 @@ function Login() {
         <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
           <form onSubmit={handleLogin}>
             <div className="font-semibold text-xl items-center text-center">
-              Cilli<span className="text-blue-500">Blog</span>
+            <div className="flex justify-center items-center w-full mb-6">
+  <img src="/LG.jpg" alt="CilliBlog Logo" className="h-20 w-25" />
+</div>
             </div>
             <h1 className="text-xl font-semibold mb-6">Login</h1>
            
@@ -84,6 +85,11 @@ function Login() {
                 Register Now
               </Link>
             </p>
+
+            <p className="text-center mb-4">
+            <Link to="/forgot-password" className="text-red-500">Forgot Password?</Link>
+          </p>
+
             <button
               type="submit"
               className="w-full p-2 bg-blue-500 hover:bg-blue-800 duration-300 rounded-md text-white"
