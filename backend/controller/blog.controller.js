@@ -1,35 +1,121 @@
 import mongoose, { mongo } from "mongoose";
 import { Blog } from "../models/blog.model.js";
 import { v2 as cloudinary } from "cloudinary";
+import slugify from "slugify";
+
+
+// export const createBlog = async (req, res) => {
+//   try {
+//     if (!req.files || !req.files.blogImage) {
+//       return res.status(400).json({ message: "Blog Image is required" });
+//     }
+
+//     const { blogImage } = req.files;
+//     if (!blogImage.mimetype.startsWith("image/")) {
+//       return res.status(400).json({ message: "Invalid file type. Only images are allowed" });
+//     }
+
+//     const { title, category, about } = req.body;
+//     if (!title || !category || !about) {
+//       return res.status(400).json({ message: "Title, category & about are required fields" });
+//     }
+//     if (about.length < 200) {
+//       return res.status(400).json({ message: "The 'About' section must contain at least 200 characters" });
+//     }
+
+//     const adminName = req.user?.name;
+//     const adminPhoto = req.user?.photo?.url;
+//     const createdBy = req.user?._id;
+
+//     // **Upload Image to Cloudinary (Async)**
+//     const cloudinaryPromise = cloudinary.uploader.upload(blogImage.tempFilePath, {
+//       folder: "blog-images",
+//       quality: "auto",
+//       resource_type: "image",
+//     });
+
+//     // **Create Blog Data**
+//     const blogData = {
+//       title,
+//       about,
+//       category,
+//       adminName,
+//       adminPhoto,
+//       createdBy,
+//     };
+
+//     // **Wait for Image Upload & Save to Database**
+//     const [cloudinaryResponse] = await Promise.all([cloudinaryPromise]);
+
+//     if (!cloudinaryResponse || cloudinaryResponse.error) {
+//       return res.status(500).json({ error: "Failed to upload image" });
+//     }
+
+//     blogData.blogImage = {
+//       public_id: cloudinaryResponse.public_id,
+//       url: cloudinaryResponse.url,
+//     };
+
+//     const blog = await Blog.create(blogData);
+
+//     res.status(201).json({ message: "Blog created successfully", blog });
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal Server Error", details: error.message });
+//   }
+// };
+
+
+
 export const createBlog = async (req, res) => {
   try {
-    if (!req.files || Object.keys(req.files).length === 0) {
+    if (!req.files || !req.files.blogImage) {
       return res.status(400).json({ message: "Blog Image is required" });
     }
+
     const { blogImage } = req.files;
-    const allowedFormats = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedFormats.includes(blogImage.mimetype)) {
-      return res.status(400).json({
-        message: "Invalid photo format. Only jpg and png are allowed",
-      });
+    if (!blogImage.mimetype.startsWith("image/")) {
+      return res.status(400).json({ message: "Invalid file type. Only images are allowed" });
     }
+
     const { title, category, about } = req.body;
     if (!title || !category || !about) {
-      return res
-        .status(400)
-        .json({ message: "title, category & about are required fields" });
+      return res.status(400).json({ message: "Title, category & about are required fields" });
     }
-    const adminName = req?.user?.name;
-    const adminPhoto = req?.user?.photo?.url;
-    const createdBy = req?.user?._id;
+    if (about.length < 200) {
+      return res.status(400).json({ message: "The 'About' section must contain at least 200 characters" });
+    }
 
-    const cloudinaryResponse = await cloudinary.uploader.upload(
-      blogImage.tempFilePath
-    );
-    if (!cloudinaryResponse || cloudinaryResponse.error) {
+    const adminName = req.user?.name;
+    const adminPhoto = req.user?.photo?.url;
+    const createdBy = req.user?._id;
+
+    // **Generate Slug (Ensure Unique)**
+    let slug = slugify(title, { lower: true, strict: true });
+    let existingBlog = await Blog.findOne({ slug });
+    
+    // If slug exists, append a number to make it unique
+    let count = 1;
+    while (existingBlog) {
+      slug = slugify(`${title}-${count}`, { lower: true, strict: true });
+      existingBlog = await Blog.findOne({ slug });
+      count++;
     }
+
+    // **Upload Image to Cloudinary (Async)**
+    const cloudinaryResponse = await cloudinary.uploader.upload(blogImage.tempFilePath, {
+      folder: "blog-images",
+      quality: "auto",
+      resource_type: "image",
+    });
+
+    if (!cloudinaryResponse || cloudinaryResponse.error) {
+      return res.status(500).json({ error: "Failed to upload image" });
+    }
+
+    // **Create Blog Data**
     const blogData = {
       title,
+      slug,  // Add the generated slug
       about,
       category,
       adminName,
@@ -40,16 +126,20 @@ export const createBlog = async (req, res) => {
         url: cloudinaryResponse.url,
       },
     };
+
     const blog = await Blog.create(blogData);
 
-    res.status(201).json({
-      message: "Blog created successfully",
-      blog,
-    });
+    res.status(201).json({ message: "Blog created successfully", blog });
   } catch (error) {
-    return res.status(500).json({ error: "Internal Server error" });
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
+
+
+
+
+
+
 
 export const deleteBlog = async (req, res) => {
   const { id } = req.params;
@@ -66,17 +156,35 @@ export const getAllBlogs = async (req, res) => {
   res.status(200).json(allBlogs);
 };
 
+// export const getSingleBlogs = async (req, res) => {
+//   const { id } = req.params;
+//   if (!mongoose.Types.ObjectId.isValid(id)) {
+//     return res.status(400).json({ message: "Invalid Blog id" });
+//   }
+//   const blog = await Blog.findById(id);
+//   if (!blog) {
+//     return res.status(404).json({ message: "Blog not found" });
+//   }
+//   res.status(200).json(blog);
+// };
+
+
 export const getSingleBlogs = async (req, res) => {
-  const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid Blog id" });
+  try {
+    const { slug } = req.params;
+
+    const blog = await Blog.findOne({ slug });
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.status(200).json(blog);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
-  const blog = await Blog.findById(id);
-  if (!blog) {
-    return res.status(404).json({ message: "Blog not found" });
-  }
-  res.status(200).json(blog);
 };
+
+
 
 export const getMyBlogs = async (req, res) => {
   const createdBy = req.user._id;
@@ -85,53 +193,167 @@ export const getMyBlogs = async (req, res) => {
 };
 
 
+// export const updateBlog = async (req, res) => {
+//   const { id } = req.params;
+
+//   if (!mongoose.Types.ObjectId.isValid(id)) {
+//     return res.status(400).json({ message: "Invalid Blog ID" });
+//   }
+
+//   try {
+//     const { title, category, about } = req.body;
+
+//     // Validation for required fields
+//     if (!title || !category || !about) {
+//       return res.status(400).json({ message: "All fields are required" });
+//     }
+
+//     // Validation for 'about' length
+//     if (about.length < 200) {
+//       return res.status(400).json({ message: "About should contain at least 200 characters!" });
+//     }
+
+//     let blogImageUrl = null;
+
+//     // Check if a new image is uploaded
+//     if (req.files && req.files.blogImage) {
+//       const file = req.files.blogImage;
+
+//       // Upload the new image to Cloudinary
+//       const result = await cloudinary.uploader.upload(file.tempFilePath, {
+//         folder: "blog-images",
+//       });
+
+//       blogImageUrl = result.secure_url;
+//     }
+
+//     // Prepare the update object
+//     const updateData = {
+//       title,
+//       category,
+//       about,
+//       ...(blogImageUrl && { blogImage: { url: blogImageUrl } }),
+//     };
+
+//     // Find and update the blog
+//     const updatedBlog = await Blog.findByIdAndUpdate(id, updateData, {
+//       new: true,
+//     });
+
+//     if (!updatedBlog) {
+//       return res.status(404).json({ message: "Blog not found" });
+//     }
+
+//     res.status(200).json({ message: "Blog updated successfully", updatedBlog });
+//   } catch (error) {
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+
+
+
+
+
+// export const updateBlog = async (req, res) => {
+//   const { id } = req.params;
+
+//   if (!mongoose.Types.ObjectId.isValid(id)) {
+//     return res.status(400).json({ message: "Invalid Blog ID" });
+//   }
+
+//   try {
+//     const { title, category, about } = req.body;
+//     if (!title || !category || !about) {
+//       return res.status(400).json({ message: "All fields are required" });
+//     }
+//     if (about.length < 200) {
+//       return res.status(400).json({ message: "About should contain at least 200 characters!" });
+//     }
+
+//     let updateData = { title, category, about };
+
+//     if (req.files?.blogImage) {
+//       const file = req.files.blogImage;
+//       const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath, {
+//         folder: "blog-images",
+//         quality: "auto",
+//       });
+
+//       updateData.blogImage = {
+//         public_id: cloudinaryResponse.public_id,
+//         url: cloudinaryResponse.secure_url,
+//       };
+//     }
+
+//     const updatedBlog = await Blog.findByIdAndUpdate(id, updateData, { new: true });
+
+//     if (!updatedBlog) {
+//       return res.status(404).json({ message: "Blog not found" });
+//     }
+
+//     res.status(200).json({ message: "Blog updated successfully", updatedBlog });
+//   } catch (error) {
+//     res.status(500).json({ message: "Internal server error", details: error.message });
+//   }
+// };
+
+
+
 
 export const updateBlog = async (req, res) => {
   const { id } = req.params;
 
-  // Validate the blog ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid Blog ID" });
   }
 
   try {
     const { title, category, about } = req.body;
-    let blogImageUrl = null;
 
-    // Check if a new image is uploaded
-    if (req.files && req.files.blogImage) {
-      const file = req.files.blogImage;
-
-      // Upload the new image to Cloudinary
-      const result = await cloudinary.uploader.upload(file.tempFilePath, {
-        folder: "blog-images", // Optional: Specify a folder in Cloudinary
-      });
-
-      blogImageUrl = result.secure_url; // Get the secure URL of the uploaded image
+    if (!title || !category || !about) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    if (about.length < 200) {
+      return res.status(400).json({ message: "About should contain at least 200 characters!" });
     }
 
-    // Prepare the update object
-    const updateData = {
+    let updateData = {
       title,
       category,
       about,
-      ...(blogImageUrl && { blogImage: { url: blogImageUrl } }), // Only update image if a new one is uploaded
+      slug: slugify(title, { lower: true, strict: true }), // Generate slug
     };
 
-    // Find and update the blog
-    const updatedBlog = await Blog.findByIdAndUpdate(id, updateData, {
-      new: true, // Return the updated document
-    });
+    if (req.files?.blogImage) {
+      const file = req.files.blogImage;
+      const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath, {
+        folder: "blog-images",
+        quality: "auto",
+      });
+
+      updateData.blogImage = {
+        public_id: cloudinaryResponse.public_id,
+        url: cloudinaryResponse.secure_url,
+      };
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!updatedBlog) {
       return res.status(404).json({ message: "Blog not found" });
     }
 
-    res.status(200).json(updatedBlog);
+    res.status(200).json({ message: "Blog updated successfully", updatedBlog });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error", details: error.message });
   }
 };
+
+
+
+
+
 
 
 
