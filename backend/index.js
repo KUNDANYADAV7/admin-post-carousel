@@ -115,16 +115,15 @@ console.log("Allowed Origins:", allowedOrigins); // Debugging log
 
 app.use(
   cors({
-    // origin: (origin, callback) => {
+    origin: (origin, callback) => {
 
-    //   console.log("Request Origin:", origin); // Debugging log
-    //   if (!origin || allowedOrigins.includes(origin)) {
-    //     callback(null, true);
-    //   } else {
-    //     callback(new Error("Not allowed by CORS"));
-    //   }
-    // },
-    origin: "*",
+      console.log("Request Origin:", origin); // Debugging log
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
