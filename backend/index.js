@@ -107,11 +107,7 @@ const port = process.env.PORT || 4001;
 const MONGO_URL = process.env.MONOG_URI;
 
 // Handle missing FRONTEND_URLS
-const allowedOrigins = [
-  "https://techy-builderr.netlify.app", 
-  "http://localhost:5174",
-  "http://localhost:5173"
-];
+const allowedOrigins = process.env.FRONTEND_URIS.split(",");
 
 app.use(
   cors({
@@ -127,6 +123,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 
 
 // Middleware
