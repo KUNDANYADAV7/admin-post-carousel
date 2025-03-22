@@ -109,7 +109,8 @@ const MONGO_URL = process.env.MONOG_URI;
 // Handle missing FRONTEND_URLS
 const allowedOrigins = [
   "https://techy-builderr.netlify.app", 
-  "http://localhost:5174"
+  "http://localhost:5174",
+  "http://localhost:5173"
 ];
 
 app.use(
