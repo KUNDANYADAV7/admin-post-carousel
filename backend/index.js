@@ -113,14 +113,40 @@ const allowedOrigins = process.env.FRONTEND_URIS ? process.env.FRONTEND_URIS.spl
 console.log("Allowed Origins:", allowedOrigins); // Debugging log
 
 
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+
+//       console.log("Request Origin:", origin); // Debugging log
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
+
+
+
+// Middleware
+
+
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: function (origin, callback) {
+      console.log("Request Origin:", origin); // Debugging
 
-      console.log("Request Origin:", origin); // Debugging log
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (e.g., mobile apps, Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.error("Blocked by CORS:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -129,12 +155,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-
-
-// Middleware
-
-
 
 
 app.use(express.json());
