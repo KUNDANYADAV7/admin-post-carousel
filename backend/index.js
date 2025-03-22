@@ -129,16 +129,6 @@ app.use(
 // Middleware
 
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      callback(null, true); // Accept any origin
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
 
 
 app.use(express.json());
