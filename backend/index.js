@@ -110,16 +110,21 @@ const MONGO_URL = process.env.MONOG_URI;
 // const allowedOrigins = process.env.FRONTEND_URIS.split(",");
 const allowedOrigins = process.env.FRONTEND_URIS ? process.env.FRONTEND_URIS.split(",") : [];
 
+console.log("Allowed Origins:", allowedOrigins); // Debugging log
+
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    // origin: (origin, callback) => {
+
+    //   console.log("Request Origin:", origin); // Debugging log
+    //   if (!origin || allowedOrigins.includes(origin)) {
+    //     callback(null, true);
+    //   } else {
+    //     callback(new Error("Not allowed by CORS"));
+    //   }
+    // },
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
