@@ -111,32 +111,20 @@ const MONGO_URL = process.env.MONOG_URI;
 const allowedOrigins = process.env.FRONTEND_URIS ? process.env.FRONTEND_URIS.split(",") : [];
 
 
-// app.use(
-//   cors({
-//     // origin: (origin, callback) => {
-//     //   if (!origin || allowedOrigins.includes(origin)) {
-//     //     callback(null, true);
-//     //   } else {
-//     //     callback(new Error("Not allowed by CORS"));
-//     //   }
-//     // },
-//     origin: allowedOrigins,
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-
-
 app.use(
   cors({
-    origin: process.env.FRONTEND_URIS ? process.env.FRONTEND_URIS.split(",") : ["http://localhost:5173"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 
 
 
